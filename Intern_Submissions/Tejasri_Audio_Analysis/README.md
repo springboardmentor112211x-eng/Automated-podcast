@@ -93,7 +93,7 @@ Human validation is supported by:
 
 This ensures transparency and trust in the generated results.
 
-##Human in the loop
+
 ![Human in the loop](images/human-in-the-loop.png)
 
 ---
