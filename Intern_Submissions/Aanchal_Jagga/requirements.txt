@@ -1,0 +1,9 @@
+streamlit
+openai-whisper
+torch
+torchvision
+torchaudio
+pydub
+setuptools-rust
+numpy
+scikit-learn
