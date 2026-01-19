@@ -101,6 +101,8 @@ Intern_Submissions/Aanchal_Jagga/outputs/result.json
 ![Home - Model Selection](demo/01_home_model_selection.png)  
 ![Upload - Processing](demo/02_upload_processing.png)  
 ![Transcript Output](demo/03_transcript_output.png)  
-![Semantic Search / Q&A](demo/04_semantic_search_qa.png)  
+![Semantic Search / Q&A](demo/04_question_answer_search..png)   
+![Topic Segments](demo/05_Topic_Segments.png)
+![GenAI Insights / Safety](demo/06_GenAI_Insights_&Safety.png)
 
 Demo video link: https://drive.google.com/file/d/1QYMn_PxymVlMvJ9gu_8GGApnVGgsXJ3w/view?usp=sharing
