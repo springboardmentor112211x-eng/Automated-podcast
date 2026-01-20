@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.http import HttpResponse
 from .models import Podcast
-from .forms import ContactForm, PodcastUploadForm
+from .forms import ContactForm, PodcastUploadForm, TranscriptEditForm
 from .transcribers_utils import transcribe_audio, segment_and_summarize
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -14,7 +14,7 @@ def index(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            messages.success(request, "Message sent successfully!")
+            messages.success(request, "Contact message sent!")
             return redirect('index')
     else:
         form = ContactForm()
@@ -45,15 +45,20 @@ def upload_podcast(request):
             podcast.status = 'processing'
             podcast.save()
             
-            # Run AI Pipeline
+            # Step 1: ASR Transcription (Whisper)
             result = transcribe_audio(podcast.audio_file.path)
+            
             if result:
+                # Step 2: GenAI Topic Segmentation & Summary
+                processed_text = segment_and_summarize(result['text'])
+                
                 podcast.transcript_raw = result['text']
-                podcast.transcript_final = segment_and_summarize(result['text'])
+                podcast.transcript_final = processed_text
                 podcast.detected_language = result['language']
                 podcast.status = 'completed'
             else:
                 podcast.status = 'failed'
+            
             podcast.save()
             return redirect('dashboard')
     else:
@@ -64,19 +69,42 @@ def upload_podcast(request):
 def transcript_detail(request, pk):
     podcast = get_object_or_404(Podcast, pk=pk, user=request.user)
     if request.method == 'POST':
-        podcast.transcript_final = request.POST.get('transcript_final')
-        podcast.save()
-        messages.success(request, "Changes saved!")
-        return redirect('dashboard')
-    return render(request, 'transcriber/transcript_detail.html', {'podcast': podcast})
+        form = TranscriptEditForm(request.POST, instance=podcast)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Transcript verified and saved!")
+            return redirect('dashboard')
+    else:
+        form = TranscriptEditForm(instance=podcast)
+    return render(request, 'transcriber/transcript_detail.html', {'podcast': podcast, 'form': form})
 
 @login_required
 def download_pdf(request, pk):
     podcast = get_object_or_404(Podcast, pk=pk, user=request.user)
+    
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
-    p.drawString(100, 750, f"Transcript: {podcast.title}")
+    width, height = letter
+
+    # PDF Content Header
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(100, height - 50, f"Podcast Transcript: {podcast.title}")
+    p.setFont("Helvetica", 12)
+    p.drawString(100, height - 70, f"Language: {podcast.detected_language}")
+    p.line(100, height - 80, 500, height - 80)
+
+    # Transcript Body
+    text_object = p.beginText(100, height - 100)
+    text_object.setFont("Helvetica", 10)
+    
+    # Simple line wrapping for PDF
+    lines = podcast.transcript_final.split('\n')
+    for line in lines:
+        text_object.textLine(line[:100]) # Basic wrap
+        
+    p.drawText(text_object)
     p.showPage()
     p.save()
+    
     buffer.seek(0)
     return HttpResponse(buffer, content_type='application/pdf')
