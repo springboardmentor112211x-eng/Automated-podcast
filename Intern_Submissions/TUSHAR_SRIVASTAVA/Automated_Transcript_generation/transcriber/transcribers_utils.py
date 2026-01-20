@@ -1,6 +1,8 @@
 import whisper
 import os
 
+from transformers import pipeline
+
 # Using the turbo model identified in your logs
 MODEL_TYPE = "turbo" 
 
@@ -20,15 +22,39 @@ def transcribe_audio(file_path):
         print(f"ASR Error: {e}")
         return None
 
+
+
+# Initialize the summarization pipeline once (it will download on first run)
+# bart-large-cnn is excellent for abstractive summarization of long text
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+
+
 def segment_and_summarize(text):
     """
-    Simulates LLM-assisted topic segmentation.
-    In production, this would call a model like GPT-4o or Claude 3.
+    Fulfills GenAI Lab requirements using a real Transformer model.
+    Based on the pipeline inference method in summarization.py.
     """
-    # Safety Prompt: Instructing the model to ignore sensitive info
-    summary_header = "### AI Executive Summary\n"
-    summary_text = "This podcast discusses major themes including... \n\n"
-    
-    segmented_body = "### Logical Topic Segments\n" + text
-    
-    return summary_header + summary_text + segmented_body
+    try:
+        # 1. Generate the Summary
+        # We truncate the input to 1024 tokens (standard for many models) 
+        # to prevent memory errors on very long podcasts.
+        summary_result = summarizer(
+            text[:3000],  # Use the first ~3000 characters for the executive summary
+            max_length=150, 
+            min_length=50, 
+            do_sample=False
+        )
+        summary_text = summary_result[0]['summary_text']
+        
+        # 2. Format the Output
+        header = "### AI EXECUTIVE SUMMARY\n"
+        body = f"{summary_text}\n\n"
+        segments_header = "### LOGICAL TOPIC SEGMENTS\n"
+        
+        # In a more advanced version, you could chunk the text 
+        # and summarize each section for true "Topic Segmentation."
+        return f"{header}{body}{segments_header}{text}"
+
+    except Exception as e:
+        print(f"Summarization error: {e}")
+        return f"### AI SUMMARY ERROR\n{text}"
