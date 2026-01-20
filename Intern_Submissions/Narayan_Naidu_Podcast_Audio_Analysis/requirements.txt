@@ -1,0 +1,22 @@
+streamlit
+numpy<2.0.0
+torch
+torchaudio
+librosa
+soundfile
+matplotlib
+pyannote.audio==3.3.1
+openai-whisper
+sentence-transformers
+scikit-learn
+transformers
+huggingface_hub
+pillow<12
+
+# Notes:
+# You need to accept terms and conditions of:
+# 1. speaker diarization model-3.1
+# 2. speaker diarization community-1 
+# 3. pyannote segmentation-3.0
+#
+# Create a Hugging face token (that represents the above models acceptance) (it is free of cost)
