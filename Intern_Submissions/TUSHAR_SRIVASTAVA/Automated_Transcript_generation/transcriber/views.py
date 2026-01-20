@@ -45,15 +45,17 @@ def upload_podcast(request):
         if form.is_valid():
             podcast = form.save(commit=False)
             podcast.user = request.user
-            podcast.status = 'processing'
             podcast.save()
             
-            # Step 1: ASR Transcription (Whisper)
+            # Step 1: Transcribe
             result = transcribe_audio(podcast.audio_file.path)
             
             if result:
-                # Step 2: GenAI Topic Segmentation & Summary
-                processed_text = segment_and_summarize(result['text'])
+                # Step 2: Pass BOTH raw text and timeline text
+                processed_text = segment_and_summarize(
+                    result['text'], 
+                    result['timeline_text']
+                )
                 
                 podcast.transcript_raw = result['text']
                 podcast.transcript_final = processed_text
@@ -64,10 +66,7 @@ def upload_podcast(request):
             
             podcast.save()
             return redirect('dashboard')
-    else:
-        form = PodcastUploadForm()
-    return render(request, 'transcriber/upload.html', {'form': form})
-
+    return render(request, 'transcriber/upload.html', {'form': PodcastUploadForm()})
 import io
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Podcast
