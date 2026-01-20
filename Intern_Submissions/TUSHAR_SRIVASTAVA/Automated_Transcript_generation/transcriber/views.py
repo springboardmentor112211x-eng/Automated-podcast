@@ -7,8 +7,11 @@ from .models import Podcast
 from .forms import ContactForm, PodcastUploadForm, TranscriptEditForm
 from .transcribers_utils import transcribe_audio, segment_and_summarize
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
 import io
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_JUSTIFY
 
 def index(request):
     if request.method == 'POST':
@@ -83,28 +86,40 @@ def download_pdf(request, pk):
     podcast = get_object_or_404(Podcast, pk=pk, user=request.user)
     
     buffer = io.BytesIO()
-    p = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
-
-    # PDF Content Header
-    p.setFont("Helvetica-Bold", 16)
-    p.drawString(100, height - 50, f"Podcast Transcript: {podcast.title}")
-    p.setFont("Helvetica", 12)
-    p.drawString(100, height - 70, f"Language: {podcast.detected_language}")
-    p.line(100, height - 80, 500, height - 80)
-
-    # Transcript Body
-    text_object = p.beginText(100, height - 100)
-    text_object.setFont("Helvetica", 10)
+    # Create a template that understands multiple pages
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                          rightMargin=72, leftMargin=72,
+                          topMargin=72, bottomMargin=18)
     
-    # Simple line wrapping for PDF
-    lines = podcast.transcript_final.split('\n')
-    for line in lines:
-        text_object.textLine(line[:100]) # Basic wrap
-        
-    p.drawText(text_object)
-    p.showPage()
-    p.save()
+    # Define styles for the document
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='Justify', alignment=TA_JUSTIFY, fontSize=10, leading=14))
+    
+    elements = []
+    
+    # 1. Add Title
+    elements.append(Paragraph(f"<b>Podcast Transcript: {podcast.title}</b>", styles['Title']))
+    elements.append(Spacer(1, 12))
+    
+    # 2. Add Metadata (Language)
+    elements.append(Paragraph(f"<i>Detected Language: {podcast.detected_language.upper()}</i>", styles['Normal']))
+    elements.append(Spacer(1, 24))
+    
+    # 3. Add the AI Transcript & Summary
+    # We split by newlines and create a new Paragraph for each block of text
+    content = podcast.transcript_final.split('\n')
+    for line in content:
+        if line.strip():
+            # Check for headers to apply bold styling
+            if line.startswith('###'):
+                clean_line = line.replace('###', '').strip()
+                elements.append(Paragraph(f"<b>{clean_line}</b>", styles['Heading3']))
+            else:
+                elements.append(Paragraph(line, styles['Justify']))
+            elements.append(Spacer(1, 10))
+            
+    # Build the PDF - Platypus will automatically create new pages as needed
+    doc.build(elements)
     
     buffer.seek(0)
     return HttpResponse(buffer, content_type='application/pdf')
