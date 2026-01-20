@@ -12,17 +12,33 @@ from .transcribers_utils import transcribe_audio
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 import io
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import ContactForm
 
 def index(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            # Handle contact form logic (e.g., send email)
+            # In a production system, you would send an email here
+            # For this lab, we will simulate success with a message
+            messages.success(request, "Your message has been sent successfully!")
             return redirect('index')
     else:
         form = ContactForm()
     
-    return render(request, 'transcriber/index.html', {'form': form})
+    # Project details for the landing page as per internship requirements
+    project_flow = [
+        "Audio Ingestion: Secure upload of MP3/WAV podcast files.",
+        "ASR Engine: Processing via OpenAI Whisper Turbo model.",
+        "Human-in-the-Loop: Interface for manual transcript verification.",
+        "Export: Generation of structured PDF reports."
+    ]
+    
+    return render(request, 'transcriber/index.html', {
+        'form': form,
+        'project_flow': project_flow
+    })
 
 def register(request):
     if request.method == 'POST':

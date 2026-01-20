@@ -73,7 +73,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Automated_Transcript_generation.wsgi.application'
 
-
+LOGIN_REDIRECT_URL = 'dashboard'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
