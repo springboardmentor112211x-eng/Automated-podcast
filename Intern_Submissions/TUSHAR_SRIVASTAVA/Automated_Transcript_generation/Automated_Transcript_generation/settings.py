@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 EXTERNAL_APPS = [
     'transcriber'
 ]
+INSTALLED_APPS += EXTERNAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
