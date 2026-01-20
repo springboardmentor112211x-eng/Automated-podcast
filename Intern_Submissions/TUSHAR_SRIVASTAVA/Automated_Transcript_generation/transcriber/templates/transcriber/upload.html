@@ -1,0 +1,10 @@
+{% extends 'transcriber/base.html' %}
+{% block content %}
+<h2>Upload Podcast</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Start Transcription</button>
+</form>
+<p class="text-muted mt-2">Note: This may take a while depending on file size.</p>
+{% endblock %}
