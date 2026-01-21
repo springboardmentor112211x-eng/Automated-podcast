@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Processing...</title>
+  <meta http-equiv="refresh" content="2">
+  <style>
+    body {
+      font-family: system-ui;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .box {
+      background: #1e293b;
+      padding: 40px;
+      border-radius: 12px;
+      text-align: center;
+      width: 420px;
+    }
+    .bar {
+      height: 12px;
+      background: #334155;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .fill {
+      height: 100%;
+      width: {{ percent }}%;
+      background: linear-gradient(90deg,#6366f1,#8b5cf6);
+      transition: width 0.5s;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Processing Audio</h2>
+    <p>{{ step }}</p>
+    <div class="bar"><div class="fill"></div></div>
+    <p style="margin-top:15px">{{ percent }}%</p>
+  </div>
+</body>
+</html>

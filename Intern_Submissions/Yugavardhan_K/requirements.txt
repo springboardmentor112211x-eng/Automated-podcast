@@ -1,0 +1,13 @@
+librosa
+sentence-transformers
+transformers
+torch
+matplotlib
+fpdf
+python-docx
+jiwer
+rouge_score
+numpy
+scikit-learn
+noisereduce
+faster_whisper
