@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+openai-whisper
+spacy
+sentence-transformers
+librosa
+scipy
+numpy
+pandas
+python-multipart
+torch
+pydantic
+transformers
+websockets
