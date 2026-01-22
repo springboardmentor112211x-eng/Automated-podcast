@@ -1,0 +1,12 @@
+streamlit
+pyngrok
+pydub
+librosa
+soundfile
+ffmpeg-python
+faster-whisper
+nltk
+sentence-transformers
+scikit-learn
+transformers
+yt-dlp
