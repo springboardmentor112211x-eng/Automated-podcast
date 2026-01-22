@@ -1,4 +1,3 @@
-
 import os
 import torch
 import torch.torch_version 
@@ -49,13 +48,13 @@ class DiarizationWrapper:
             print("4. If 'WeightsUnpickler' error persists, try downgrading PyTorch to <2.6\n")
             raise e
 
-    def run(self, audio_file_path: str) -> List[Dict]:
+    def run(self, audio_file_path: str, min_speakers: int = None, max_speakers: int = None) -> List[Dict]:
         if not self.pipeline:
              raise RuntimeError("Diarization pipeline not loaded.")
              
-        print("Running Speaker Diarization...")
+        print(f"Running Speaker Diarization (min={min_speakers}, max={max_speakers})...")
         # Run pipeline
-        diarization = self.pipeline(audio_file_path)
+        diarization = self.pipeline(audio_file_path, min_speakers=min_speakers, max_speakers=max_speakers)
         
 
         
