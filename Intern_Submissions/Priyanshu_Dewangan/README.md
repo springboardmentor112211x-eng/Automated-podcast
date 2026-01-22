@@ -434,22 +434,22 @@ API at: http://localhost:8000/docs
 
 ### Tab 1: Upload & Process
 ```
-
+![alt text](<Screenshot 2026-01-22 at 18-35-13 Podcast Insights AI.png>)
 ```
 
 ### Tab 2: Transcript & Summaries
 ```
-
+![alt text](<Screenshot 2026-01-22 at 18-35-40 Podcast Insights AI.png>)
 ```
 
 ### Tab 3: Q&A Chat
 ```
-
+![alt text](<Screenshot 2026-01-22 at 18-36-21 Podcast Insights AI.png>)
 ```
 
 ### Tab 4: Query History
 ```
-
+![alt text](<Screenshot 2026-01-22 at 18-43-56 Podcast Insights AI.png>)
 ```
 
 ---
