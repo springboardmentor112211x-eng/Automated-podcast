@@ -1,6 +1,4 @@
-
 from sentence_transformers import SentenceTransformer
-from sklearn.cluster import KMeans
 from transformers import pipeline
 from typing import List, Dict
 
@@ -23,63 +21,108 @@ class NLPProcessor:
         )
 
     def segment_topics(self, segments: List[Dict], num_clusters: int = 5) -> List[Dict]:
-        """
-        Embed sentences and cluster them into topics.
-        """
-        print("Segmenting topics...")
+        print("Segmenting topics (content-based analysis)...")
         
         if not segments:
             return []
+        
+        import re
+        import numpy as np
+        
+        # Step 1: Extract all sentences with their time references
+        all_sentences = []
+        for seg in segments:
+            text = seg["text"]
+            start_time = seg["start"]
+            end_time = seg["end"]
             
-        sentences = [seg["text"] for seg in segments]
-        
-        if len(sentences) < num_clusters:
-            num_clusters = max(1, len(sentences))
-
-        # Embed
-        embeddings = self.sbert.encode(sentences)
-        
-        # Cluster
-        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
-        labels = kmeans.fit_predict(embeddings)
-        
-        # Group consecutive segments with same label
-        topic_segments = []
-
-        current_topic_idx = labels[0]
-        current_start = segments[0]["start"]
-        current_text = [segments[0]["text"]]
-        
-        for i in range(1, len(segments)):
-            label = labels[i]
-            if label == current_topic_idx:
-                current_text.append(segments[i]["text"])
-            else:
-                # Close current segment
-                end_time = segments[i-1]["end"]
-                topic_segments.append({
-                    "start": current_start,
-                    "end": end_time,
-                    "topic_id": int(current_topic_idx), 
-                    "text": " ".join(current_text)
+            # Split into sentences
+            sentences = re.split(r'(?<=[.!?])\s+', text)
+            sentences = [s.strip() for s in sentences if s.strip()]
+            
+            if not sentences:
+                continue
+            
+            # Distribute time across sentences proportionally
+            total_chars = sum(len(s) for s in sentences)
+            current_time = start_time
+            duration = end_time - start_time
+            
+            for sent in sentences:
+                if total_chars > 0:
+                    sent_duration = (len(sent) / total_chars) * duration
+                else:
+                    sent_duration = duration / len(sentences)
+                
+                all_sentences.append({
+                    "text": sent,
+                    "start": current_time,
+                    "end": current_time + sent_duration
                 })
-                # Start new
-                current_topic_idx = label
-                current_start = segments[i]["start"]
-                current_text = [segments[i]["text"]]
+                current_time += sent_duration
         
-        # Add last segment
-        topic_segments.append({
-            "start": current_start,
-            "end": segments[-1]["end"],
-            "topic_id": int(current_topic_idx),
-            "text": " ".join(current_text)
-        })
+        if not all_sentences:
+            return []
         
-        for i, segment in enumerate(topic_segments):
-            segment["topic_id"] = i
-
+        # Step 2: Compute embeddings for all sentences
+        texts = [s["text"] for s in all_sentences]
+        embeddings = self.sbert.encode(texts)
+        
+        # Step 3: Detect topic boundaries using similarity drops
+        SIMILARITY_THRESHOLD = 0.4  
+        WINDOW_SIZE = 3  
+        
+        topic_boundaries = [0]  
+        
+        for i in range(WINDOW_SIZE, len(all_sentences) - WINDOW_SIZE):
+            before_avg = np.mean(embeddings[i-WINDOW_SIZE:i], axis=0)
+            after_avg = np.mean(embeddings[i:i+WINDOW_SIZE], axis=0)
+            
+            similarity = self._cosine_similarity(before_avg, after_avg)
+            
+            if similarity < SIMILARITY_THRESHOLD:
+                if len(topic_boundaries) == 0 or i > topic_boundaries[-1] + WINDOW_SIZE:
+                    topic_boundaries.append(i)
+        
+        # Step 4: Create topic segments
+        topic_segments = []
+        
+        for idx, boundary_start in enumerate(topic_boundaries):
+            if idx + 1 < len(topic_boundaries):
+                boundary_end = topic_boundaries[idx + 1]
+            else:
+                boundary_end = len(all_sentences)
+            
+            topic_sentences = all_sentences[boundary_start:boundary_end]
+            
+            if topic_sentences:
+                topic_text = " ".join([s["text"] for s in topic_sentences])
+                topic_segments.append({
+                    "topic_id": idx,
+                    "start": topic_sentences[0]["start"],
+                    "end": topic_sentences[-1]["end"],
+                    "text": topic_text
+                })
+        
+        if not topic_segments and all_sentences:
+            topic_segments.append({
+                "topic_id": 0,
+                "start": all_sentences[0]["start"],
+                "end": all_sentences[-1]["end"],
+                "text": " ".join([s["text"] for s in all_sentences])
+            })
+        
         return topic_segments
+    
+    def _cosine_similarity(self, vec1, vec2) -> float:
+        """Calculate cosine similarity between two vectors."""
+        import numpy as np
+        dot = np.dot(vec1, vec2)
+        norm1 = np.linalg.norm(vec1)
+        norm2 = np.linalg.norm(vec2)
+        if norm1 == 0 or norm2 == 0:
+            return 0.0
+        return dot / (norm1 * norm2)
 
     def summarize_segments(self, topic_segments: List[Dict]) -> List[Dict]:
         """
