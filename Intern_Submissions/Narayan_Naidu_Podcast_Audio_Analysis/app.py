@@ -72,7 +72,9 @@ This tool analyzes podcasts and audio discussions. Upload an MP3 or WAV file to 
 st.sidebar.header("Configuration")
 diarization_model = st.sidebar.text_input("Diarization Model", "pyannote/speaker-diarization-3.1")
 whisper_model = st.sidebar.text_input("Whisper Model", "openai/whisper-large-v3")
-num_clusters = st.sidebar.slider("Number of Topics", 2, 20, 8, help="Controls how many distinct segments the AI identifies. \n\n- **Lower (e.g., 4):** Broader, more general topics.\n- **Higher (e.g., 12):** More detailed, granular topics.\n\nAdjust this based on how many different subjects are discussed in the audio.")
+num_clusters = 8 # Default topics
+
+
 
 # --- File Upload ---
 uploaded_file = st.file_uploader("Upload Audio File", type=['mp3', 'wav'])
@@ -199,7 +201,7 @@ if uploaded_file is not None:
                 
                 # 2. Diarization
                 with st.spinner("Running Speaker Diarization..."):
-                    pipeline.diarize()
+                    pipeline.diarize() 
                 
                 # 3. Transcription
                 progress_bar = st.progress(0)
