@@ -1,0 +1,36 @@
+{% extends 'transcriber/base.html' %}
+
+{% block content %}
+<h2>My Dashboard</h2>
+<a href="{% url 'upload_podcast' %}" class="btn btn-success mb-3">Upload New Podcast</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pod in podcasts %}
+        <tr>
+            <td>{{ pod.title }}</td>
+            <td>
+                <span class="badge {% if pod.status == 'completed' %}bg-success{% else %}bg-warning{% endif %}">
+                    {{ pod.status }}
+                </span>
+            </td>
+            <td>{{ pod.created_at|date:"M d, Y" }}</td>
+            <td>
+                {% if pod.status == 'completed' %}
+                    <a href="{% url 'transcript_detail' pod.pk %}" class="btn btn-sm btn-primary">View & Edit</a>
+                    <a href="{% url 'download_pdf' pod.pk %}" class="btn btn-sm btn-secondary">PDF</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

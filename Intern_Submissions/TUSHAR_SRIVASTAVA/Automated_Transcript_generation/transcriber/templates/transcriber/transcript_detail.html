@@ -1,0 +1,60 @@
+{% extends 'transcriber/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Review: {{ podcast.title }}</h2>
+        <a href="{% url 'download_pdf' podcast.pk %}" class="btn btn-outline-danger">
+            <i class="bi bi-file-pdf"></i> Export to PDF
+        </a>
+    </div>
+
+    <div class="alert alert-info shadow-sm mb-4">
+        <strong>GenAI Insights:</strong> Detected Language: {{ podcast.detected_language|upper }}
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4 mb-4">
+                <h3 class="fw-bold mb-4">Transcript Timeline</h3>
+                <div class="timeline-content" style="line-height: 1.8; color: #444;">
+                    {{ main_content|linebreaks }}
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm p-4">
+                <h5 class="fw-bold mb-3">Edit/Verify Raw Data</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ form.transcript_final }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save & Verify Changes</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm p-4 mb-4 bg-light">
+                <h5 class="fw-bold"><span class="me-2">🧠</span> AI Topic Modeling</h5>
+                <p class="small text-muted mb-3">Detected via NMF, LDA, and LSA:</p>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for topic in mathematical_topics %}
+                        <span class="badge bg-white text-dark border p-2">{{ topic }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm p-4 mb-4" style="border-left: 5px solid #0d6efd !important;">
+                <h5 class="fw-bold">Executive Summary</h5>
+                <p class="text-muted" style="font-size: 0.95rem;">
+                    {{ summary_text }}
+                </p>
+                <hr>
+                <small class="text-primary fw-bold">Method: Abstractive Summarization</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
