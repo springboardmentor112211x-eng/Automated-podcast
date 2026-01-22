@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+venv/
+env/
+*.egg-info/
+
+# Streamlit / temp files
+*.wav
+*.mp3
+chunks/
+*.json
+
+# Django / migrations
+*/migrations/*.py
+*/migrations/*.pyc
+db.sqlite3
+*.log
+
+# Others
+.DS_Store
