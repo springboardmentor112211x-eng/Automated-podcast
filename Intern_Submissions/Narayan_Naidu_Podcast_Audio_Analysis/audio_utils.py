@@ -1,4 +1,3 @@
-
 import os
 import numpy as np
 import librosa
@@ -62,3 +61,22 @@ def load_and_preprocess_audio(file_path: str, target_sr: int = 16000) -> tuple[n
     sf.write(processed_path, y_normalized, target_sr)
     
     return y_normalized, processed_path
+
+def save_results_to_txt(transcription_result: list, output_path: str = "transcription.txt"):
+    """
+    Save the full transcription to a text file.
+    """
+    with open(output_path, "w", encoding="utf-8") as f:
+        for seg in transcription_result:
+            start = seg["start"]
+            end = seg["end"]
+            speaker = seg["speaker"]
+            text = seg["text"]
+            
+            # Format: [00:00 - 00:30] Speaker 1: Text...
+            start_str = f"{int(start//60):02d}:{start%60:05.2f}"
+            end_str = f"{int(end//60):02d}:{end%60:05.2f}"
+            
+            f.write(f"[{start_str} - {end_str}] {speaker}:\n{text}\n\n")
+    
+    return output_path
