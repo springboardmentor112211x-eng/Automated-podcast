@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Analysis Results</title>
+  <style>
+    body {
+      font-family: Arial;
+      padding: 30px;
+      background: #f4f6f8;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Transcript</h2>
+  <div class="box">
+    <pre>{{ transcript }}</pre>
+  </div>
+
+  <h2>Segments</h2>
+  <div class="box">
+    {% for line in segments %}
+      {{ line }}<br>
+    {% endfor %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Audio Analysis System</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      width: 450px;
+      border-radius: 14px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+      text-align: center;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #667eea;
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+
+    .actions {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .actions a {
+      display: block;
+      margin-top: 10px;
+      padding: 10px;
+      background: #f1f3ff;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #333;
+    }
+
+    .info {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .preview {
+      background: #f4f6f8;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 13px;
+      text-align: left;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2>Audio Analysis System</h2>
+
+    <input type="file" id="audioFile" accept=".wav,.mp3,.flac,.m4a"/>
+
+    <button id="analyzeBtn" onclick="analyzeAudio()">Analyze Audio</button>
+
+    <p id="status"></p>
+
+    <div class="info" id="language"></div>
+
+    <div class="preview" id="preview"></div>
+
+    <div class="actions" id="actions">
+      <a href="/download/transcript">📄 Download Transcript</a>
+      <a href="/download/segments">⏱ Download Segments</a>
+      <a href="/view">👀 View Transcript & Segments</a>
+    </div>
+  </div>
+
+  <script>
+    function analyzeAudio() {
+      const fileInput = document.getElementById("audioFile");
+      const button = document.getElementById("analyzeBtn");
+
+      if (!fileInput.files.length) {
+        alert("Please select an audio file");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      button.disabled = true;
+      document.getElementById("status").innerText = "Analyzing audio...";
+      document.getElementById("actions").style.display = "none";
+
+      fetch("/upload", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById("status").innerText = data.error;
+          button.disabled = false;
+          return;
+        }
+
+        document.getElementById("status").innerText = "Analysis completed";
+        document.getElementById("language").innerText =
+          "Detected language: " + data.language;
+
+        document.getElementById("preview").innerText = data.preview;
+        document.getElementById("preview").style.display = "block";
+
+        document.getElementById("actions").style.display = "block";
+        button.disabled = false;
+      })
+      .catch(() => {
+        document.getElementById("status").innerText = "Error occurred";
+        button.disabled = false;
+      });
+    }
+  </script>
+</body>
+</html>
