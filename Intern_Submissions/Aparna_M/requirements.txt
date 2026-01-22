@@ -1,0 +1,10 @@
+streamlit
+librosa
+torch
+transformers
+sentence-transformers
+keybert
+nltk
+scikit-learn
+numpy
+soundfile
