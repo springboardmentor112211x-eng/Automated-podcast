@@ -358,11 +358,36 @@ if uploaded_file is not None:
             txt_summaries = format_summaries(results["summaries"])
             st.download_button("Download Summaries (.txt)", txt_summaries, file_name="summaries.txt", mime="text/plain")
 
+            # Callback to handle accordion toggle
+            def toggle_summary(tid):
+                if st.session_state.get('active_summary_id') == tid:
+                    st.session_state['active_summary_id'] = None
+                else:
+                    st.session_state['active_summary_id'] = tid
+
             def render_summary_item(item):
                 topic_id = item['topic_id']
                 topic_name = item.get('topic_name', f"Topic {topic_id}")
-                st.markdown(f"#### {topic_name} ({item['start']:.1f}s - {item['end']:.1f}s)")
-                st.write(item["summary"])
+                
+                # Check if this topic is the active one
+                is_active = st.session_state.get('active_summary_id') == topic_id
+                
+                # Visual cues
+                icon = "▼" if is_active else "▶"
+                label = f"{icon} {topic_name} ({item['start']:.1f}s - {item['end']:.1f}s)"
+                
+                # Use a button as the clickable header
+                st.button(
+                    label,
+                    key=f"summary_btn_{topic_id}",
+                    on_click=toggle_summary,
+                    args=(topic_id,),
+                    use_container_width=True
+                )
+                
+                # Conditional rendering of content
+                if is_active:
+                    st.info(item["summary"])
             
             render_paginated_list(results["summaries"], "summaries_tab", render_summary_item)
 
