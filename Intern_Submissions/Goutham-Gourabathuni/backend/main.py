@@ -39,8 +39,13 @@ LAST_TRANSCRIPT_TEXT = ""
 run_pipeline_last_result = None
 
 # -----------------------------
-# Health check
+# Health check and root
 # -----------------------------
+
+@app.get("/")
+def root():
+    return {"status": "Backend is working",
+            "message": "I am watching youuuuu..."}
 
 @app.get("/health")
 def health():
