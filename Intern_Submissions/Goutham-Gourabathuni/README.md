@@ -84,6 +84,7 @@ Other
 ---
 
 ## Pipeline
+```
 
 Audio Upload
    ↓
@@ -107,6 +108,7 @@ Episode-Level Summary
    ↓
 Q&A + PDF Export
 
+```
 ---
 
 ## Repo Structure
@@ -231,28 +233,34 @@ Future improvements:
 ```bash
 git clone <your-fork-url>
 cd Intern_Submissions/"your directory name"
-```
+```   
+
 2️⃣ Create & activate virtual environment
 ```bash
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 ```
+
 3️⃣ Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
+
 4️⃣ Set environment variables
 ```bash
 GEMINI_API_KEY="your_gemini_api_key_here"
 ```
+
 5️⃣ Start backend
 ```bash
 uvicorn backend.main:app --reload
 ```
+
 6️⃣ Start frontend
 ```bash
 streamlit run frontend/app.py
 ```
+
 Frontend runs at:
 http://localhost:8501
 
