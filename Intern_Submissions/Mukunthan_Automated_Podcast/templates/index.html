@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Automated Podcast Transcription</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        header p {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 30px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+
+        input[type="file"] {
+            margin-top: 10px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .output-box {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .download-btns {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🎙 Automated Podcast Transcription</h1>
+    <p>Speech-to-Text & Topic Segmentation System</p>
+</header>
+
+<div class="container">
+
+    <!-- Upload Section -->
+    <div class="card">
+        <h2>Upload Podcast Audio</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="audio" required>
+            <br>
+            <button type="submit">Upload & Transcribe</button>
+        </form>
+    </div>
+
+    {% if transcript %}
+    <!-- Transcript Section -->
+    <div class="card">
+        <h2>Full Transcript</h2>
+        <div class="output-box">
+            {{ transcript }}
+        </div>
+
+        <div class="download-btns">
+            <a href="/download/transcript.txt">
+                <button>Download Transcript</button>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if segments %}
+    <!-- Segmentation Section -->
+    <div class="card">
+        <h2>Segmented Transcript</h2>
+        <div class="output-box">
+            <ul>
+                {% for seg in segments %}
+                <li>
+                    <b>{{ "%.2f"|format(seg.start) }}s – {{ "%.2f"|format(seg.end) }}s</b><br>
+                    {{ seg.text }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="download-btns">
+            <a href="/download/segments.txt">
+                <button>Download Segments</button>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<footer>
+    © 2026 | Automated Podcast Transcription & Topic Segmentation
+</footer>
+
+</body>
+</html>
