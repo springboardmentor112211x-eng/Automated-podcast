@@ -1,0 +1,45 @@
+body {
+  background: linear-gradient(135deg, lch(35.67% 118.03 310.14 / 0.959), #535753);
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+.container {
+  width: 70%;
+  margin: 60px auto;
+  background: rgba(255,255,255,0.1);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+.subtitle {
+  color: #ddd;
+  margin-bottom: 20px;
+}
+
+button {
+  background: #ff9800;
+  border: none;
+  padding: 12px 25px;
+  font-size: 16px;
+  color: black;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: gray;
+  cursor: not-allowed;
+}
+
+.topic {
+  background: rgba(255,255,255,0.15);
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 8px;
+}
+
+.download {
+  margin-top: 20px;
+}
