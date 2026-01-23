@@ -1,6 +1,6 @@
 ![PodC-banner](images/PodC%20-%20banner.png)
 
-# PodC - The automated podcast analyzer
+# PodC - The Automated Podcast Summarizer
 
 ## Problem
 
@@ -9,11 +9,11 @@ Users often want summaries, topic-wise breakdowns, and answers to questions with
 
 This system solves that problem by:
 
--> Automatically converting podcast audio into text
--> Segmenting conversations into meaningful topics
--> Generating summaries and insights using GenAI
--> Enabling Q&A over the podcast content
--> Exporting structured results as a PDF for offline use
+- Automatically converting podcast audio into text
+- Segmenting conversations into meaningful topics
+- Generating summaries and insights using GenAI
+- Enabling Q&A over the podcast content
+- Exporting structured results as a PDF for offline use
 
 The result is structured, searchable, topic-wise knowledge from raw audio.
 
@@ -40,30 +40,30 @@ The system prioritizes explainability, cost-efficiency, and safety.
 ## Tech Stack
 
 ASR
--> OpenAI Whisper (via asr.py) for speech-to-text transcription
+- OpenAI Whisper (via asr.py) for speech-to-text transcription
 
 LLMs / GenAI
--> Gemini 2.5 Flash (for Q&A over podcast context)
--> HuggingFace BART (for episode-level summarization)
--> Sentence-BERT (MiniLM) for embeddings & topic segmentation
+- Gemini 2.5 Flash (for Q&A over podcast context)
+- HuggingFace BART (for episode-level summarization)
+- Sentence-BERT (MiniLM) for embeddings & topic segmentation
 
 ML / NLP
--> Sentence embeddings (SentenceTransformers)
--> Cosine similarity–based topic boundary detection
--> TF-IDF + noun phrase extraction for topic titles
+- Sentence embeddings (SentenceTransformers)
+- Cosine similarity–based topic boundary detection
+- TF-IDF + noun phrase extraction for topic titles
 
 Backend
--> FastAPI (REST APIs)
--> Python modular pipeline design
+- FastAPI (REST APIs)
+- Python modular pipeline design
 
 UI
--> Streamlit (interactive web app)
--> Dark / Light mode toggle
--> Human review controls
+- Streamlit (interactive web app)
+- Dark / Light mode toggle
+- Human review controls
 
 Other
--> PDF generation (ReportLab)
--> Environment variables via .env
+- PDF generation (ReportLab)
+- Environment variables via .env
 
 | Component                   | Technology                       | Version / Model         |
 | --------------------------- | -------------------------------- | ----------------------- |
@@ -110,6 +110,7 @@ Q&A + PDF Export
 ---
 
 ## Repo Structure
+```
 
 Intern_Submissions/
 └── Goutham-Gourabathuni/
@@ -142,6 +143,7 @@ Intern_Submissions/
     ├── README.md
     └── demo.md
 
+```
 ---
 
 ## Prompt Strategy
@@ -226,31 +228,31 @@ Future improvements:
 ## How to Run
 
 1️⃣ Clone the repository
-
+```bash
 git clone <your-fork-url>
-cd Intern_Submissions/Goutham-Gourabathuni
-
+cd Intern_Submissions/"your directory name"
+```
 2️⃣ Create & activate virtual environment
-
+```bash
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
-
+```
 3️⃣ Install dependencies
-
+```bash
 pip install -r requirements.txt
-
+```
 4️⃣ Set environment variables
-
+```bash
 GEMINI_API_KEY="your_gemini_api_key_here"
-
+```
 5️⃣ Start backend
-
+```bash
 uvicorn backend.main:app --reload
-
+```
 6️⃣ Start frontend
-
+```bash
 streamlit run frontend/app.py
-
+```
 Frontend runs at:
 http://localhost:8501
 
