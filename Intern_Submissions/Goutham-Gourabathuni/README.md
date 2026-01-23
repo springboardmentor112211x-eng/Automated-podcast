@@ -343,9 +343,9 @@ Click on the backend uvicorn URL `http://127.0.0.1:8000`.
 
 ![BE](images/PodC-infy-backend-process.png)
 
-![BE-1](images/PodC-infy-backend-process1.png)
-
 ![BE-2](images/PodC-infy-backend-process2.png)
+
+![BE-3](images/PodC-infy-backend-process3.png)
 
 ---
 
