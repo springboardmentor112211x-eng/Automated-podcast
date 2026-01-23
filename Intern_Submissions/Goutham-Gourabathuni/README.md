@@ -414,5 +414,3 @@ Click on the backend uvicorn URL `http://127.0.0.1:8000`.
 ![api-call-question](images/PodC-infy-BE-request.png)
 
 ---
-
-## Website Link
