@@ -1,4 +1,4 @@
-![Dark-mode-display](Intern_Submissions/Goutham-Gourabathuni/images/PodC-infy-FE.png)
+![Dark-mode-display](images/PodC-infy-FE.png)
 
 ## Demo
 
