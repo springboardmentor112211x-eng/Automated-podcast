@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, send_file
+from flask import Flask, render_template, request, send_from_directory
 import whisper
 import os
 
@@ -10,58 +10,35 @@ OUTPUT_FOLDER = "outputs"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# Load Whisper model
 model = whisper.load_model("base")
 
-@app.route("/")
-def home():
-    return redirect("/upload")
+@app.route("/", methods=["GET", "POST"])
+def index():
+    segments = None
 
-@app.route("/upload", methods=["GET", "POST"])
-def upload():
-    if request.method == "GET":
-        return render_template("index.html")
+    if request.method == "POST":
+        audio = request.files["audio"]
+        audio_path = os.path.join(UPLOAD_FOLDER, audio.filename)
+        audio.save(audio_path)
 
-    # POST
-    if "audio" not in request.files:
-        return "No file uploaded"
+        result = model.transcribe(audio_path)
 
-    file = request.files["audio"]
-    if file.filename == "":
-        return "No selected file"
+        transcript_path = os.path.join(OUTPUT_FOLDER, "transcript.txt")
+        segments_path = os.path.join(OUTPUT_FOLDER, "segments.txt")
 
-    audio_path = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(audio_path)
+        with open(transcript_path, "w", encoding="utf-8") as f:
+            f.write(result["text"])
 
-    # Transcribe with segments
-    result = model.transcribe(audio_path)
+        segments = result["segments"]
+        with open(segments_path, "w", encoding="utf-8") as f:
+            for seg in segments:
+                f.write(f"{seg['start']:.2f} - {seg['end']:.2f}: {seg['text']}\n")
 
-    full_text = result["text"]
-    segments = result["segments"]
-
-    # Save full transcript
-    transcript_path = os.path.join(OUTPUT_FOLDER, "transcript.txt")
-    with open(transcript_path, "w", encoding="utf-8") as f:
-        f.write(full_text)
-
-    # Save segmented transcript
-    segments_path = os.path.join(OUTPUT_FOLDER, "segments.txt")
-    with open(segments_path, "w", encoding="utf-8") as f:
-        for seg in segments:
-            f.write(
-                f"[{seg['start']:.2f}s - {seg['end']:.2f}s] {seg['text']}\n"
-            )
-
-    return render_template(
-        "index.html",
-        transcript=full_text,
-        segments=segments
-    )
+    return render_template("index.html", segments=segments)
 
 @app.route("/download/<filename>")
 def download(filename):
-    file_path = os.path.join(OUTPUT_FOLDER, filename)
-    return send_file(file_path, as_attachment=True)
+    return send_from_directory(OUTPUT_FOLDER, filename, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=True)
