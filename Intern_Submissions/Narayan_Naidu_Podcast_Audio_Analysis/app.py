@@ -56,6 +56,37 @@ st.markdown("""
   visibility: visible;
   opacity: 1;
 }
+
+/* Card Style for Results */
+.result-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+}
+.result-card:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #e0e0e0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 5px;
+}
+.result-text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #f0f0f0;
+}
+.highlight {
+    color: #4CAF50;
+    font-weight: bold;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -143,8 +174,38 @@ if uploaded_file is not None:
         except Exception as e:
             st.error(f"Could not read file info: {e}")
 
-    # Load for detailed metrics (using librosa)
-    y, sr = librosa.load(tmp_file_path, sr=None) 
+    # Load for detailed metrics (using librosa) - Cached via Session State
+    if 'audio_data' not in st.session_state or st.session_state.get('audio_file_path') != tmp_file_path:
+        with st.spinner("Analyzing Audio Characteristics..."):
+            y, sr = librosa.load(tmp_file_path, sr=None)
+            
+            # Generate Spectrogram Figure
+            fig, ax = plt.subplots(figsize=(10, 3))
+            S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, fmax=8000)
+            S_dB = librosa.power_to_db(S, ref=np.max)
+            img = librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', sr=sr, fmax=8000, ax=ax)
+            fig.colorbar(img, ax=ax, format='%+2.0f dB')
+            ax.set_title('Mel-frequency spectrogram')
+            
+            # Save to buffer for download
+            buf = io.BytesIO()
+            fig.savefig(buf, format="pdf", bbox_inches='tight')
+            buf.seek(0)
+            
+            st.session_state['audio_data'] = {
+                'y': y,
+                'sr': sr,
+                'fig': fig,
+                'buf': buf
+            }
+            st.session_state['audio_file_path'] = tmp_file_path
+
+    # Retrieve from cache
+    audio_data = st.session_state['audio_data']
+    y = audio_data['y']
+    sr = audio_data['sr']
+    fig = audio_data['fig']
+    buf = audio_data['buf'] 
     
     with col2:
         st.subheader("Audio Details")
@@ -168,18 +229,7 @@ if uploaded_file is not None:
     </div>
     """, unsafe_allow_html=True)
     
-    fig, ax = plt.subplots(figsize=(10, 3))
-    S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, fmax=8000)
-    S_dB = librosa.power_to_db(S, ref=np.max)
-    img = librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', sr=sr, fmax=8000, ax=ax)
-    fig.colorbar(img, ax=ax, format='%+2.0f dB')
-    ax.set_title('Mel-frequency spectrogram')
     st.pyplot(fig)
-    
-    # Save fig to buffer for download
-    buf = io.BytesIO()
-    fig.savefig(buf, format="pdf", bbox_inches='tight')
-    buf.seek(0)
     
     st.download_button(
         label="Download Spectrogram (PDF)",
@@ -285,13 +335,13 @@ if uploaded_file is not None:
         text = "Topic ID | Start | End | Content\n"
         text += "-" * 50 + "\n"
         for seg in data:
-             text += f"{seg['topic_id']} | {seg['start']:.1f}s | {seg['end']:.1f}s | {seg['text']}\n"
+             text += f"{seg['topic_id'] + 1} | {seg['start']:.1f}s | {seg['end']:.1f}s | {seg['text']}\n"
         return text
 
     def format_summaries(data):
         text = ""
         for item in data:
-            topic_name = item.get('topic_name', f"Topic {item['topic_id']}")
+            topic_name = item.get('topic_name', f"Topic {item['topic_id'] + 1}")
             text += f"### {topic_name} ({item['start']:.1f}s - {item['end']:.1f}s)\n"
             text += f"{item['summary']}\n\n"
         return text
@@ -314,7 +364,17 @@ if uploaded_file is not None:
                 end = f"{seg['end']:.1f}s"
                 speaker = seg['speaker']
                 text = seg['text']
-                st.markdown(f"**[{start} - {end}] {speaker}:** {text}")
+                
+                html = f"""
+                <div class="result-card">
+                    <div class="result-header">
+                        <span class="highlight">{speaker}</span>
+                        <span>{start} - {end}</span>
+                    </div>
+                    <div class="result-text">{text}</div>
+                </div>
+                """
+                st.markdown(html, unsafe_allow_html=True)
 
             render_paginated_list(results["transcription"], "transcription_tab", render_transcription_item)
 
@@ -325,30 +385,25 @@ if uploaded_file is not None:
             txt_topics = format_topics(results["topics"])
             st.download_button("Download Topics (.txt)", txt_topics, file_name="topic_segments.txt", mime="text/plain")
 
-            # To stick to "pagination" request strictly:
-            if f'page_topics_tab' not in st.session_state:
-                 st.session_state[f'page_topics_tab'] = 0
-            
-            page = st.session_state[f'page_topics_tab']
-            items_per_page = 10
-            total_pages = (len(results["topics"]) - 1) // items_per_page + 1
-            
-            start_idx = page * items_per_page
-            end_idx = start_idx + items_per_page
-            
-            st.table(results["topics"][start_idx:end_idx])
-            
-            if total_pages > 1:
-                c1, c2, c3 = st.columns([1, 8, 1])
-                if c1.button("Previous", key="prev_topics"):
-                    if page > 0:
-                        st.session_state['page_topics_tab'] -= 1
-                        st.rerun()
-                if c3.button("Next", key="next_topics"):
-                    if page < total_pages - 1:
-                        st.session_state['page_topics_tab'] += 1
-                        st.rerun()
-                c2.write(f"Page {page + 1} of {total_pages}")
+            # Wrapper for paginated list
+            def render_topic_item(seg):
+                topic_id = seg['topic_id']
+                start = f"{seg['start']:.1f}s"
+                end = f"{seg['end']:.1f}s"
+                text = seg['text']
+                
+                html = f"""
+                <div class="result-card">
+                    <div class="result-header">
+                        <span class="highlight">Topic {topic_id + 1}</span>
+                        <span>{start} - {end}</span>
+                    </div>
+                    <div class="result-text">{text}</div>
+                </div>
+                """
+                st.markdown(html, unsafe_allow_html=True)
+
+            render_paginated_list(results["topics"], "topics_tab", render_topic_item)
 
 
         with tab3:
@@ -358,36 +413,23 @@ if uploaded_file is not None:
             txt_summaries = format_summaries(results["summaries"])
             st.download_button("Download Summaries (.txt)", txt_summaries, file_name="summaries.txt", mime="text/plain")
 
-            # Callback to handle accordion toggle
-            def toggle_summary(tid):
-                if st.session_state.get('active_summary_id') == tid:
-                    st.session_state['active_summary_id'] = None
-                else:
-                    st.session_state['active_summary_id'] = tid
-
             def render_summary_item(item):
                 topic_id = item['topic_id']
-                topic_name = item.get('topic_name', f"Topic {topic_id}")
+                topic_name = item.get('topic_name', f"Topic {topic_id + 1}")
+                start = f"{item['start']:.1f}s"
+                end = f"{item['end']:.1f}s"
+                summary_text = item["summary"]
                 
-                # Check if this topic is the active one
-                is_active = st.session_state.get('active_summary_id') == topic_id
-                
-                # Visual cues
-                icon = "▼" if is_active else "▶"
-                label = f"{icon} {topic_name} ({item['start']:.1f}s - {item['end']:.1f}s)"
-                
-                # Use a button as the clickable header
-                st.button(
-                    label,
-                    key=f"summary_btn_{topic_id}",
-                    on_click=toggle_summary,
-                    args=(topic_id,),
-                    use_container_width=True
-                )
-                
-                # Conditional rendering of content
-                if is_active:
-                    st.info(item["summary"])
+                html = f"""
+                <div class="result-card">
+                    <div class="result-header">
+                        <span class="highlight">{topic_name}</span>
+                        <span>{start} - {end}</span>
+                    </div>
+                    <div class="result-text">{summary_text}</div>
+                </div>
+                """
+                st.markdown(html, unsafe_allow_html=True)
             
             render_paginated_list(results["summaries"], "summaries_tab", render_summary_item)
 
