@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Transcription Results - Podcast AI{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">📊</span>
+        <div>
+            <h1>Transcription Results</h1>
+            <p class="subtitle">Complete analysis of your podcast content</p>
+        </div>
+    </div>
+
+    <!-- Transcription Section -->
+    <div class="section">
+        <h2>📝 Full Transcription</h2>
+        <div class="transcription-box">
+            <p>{{ podcast.transcript }}</p>
+        </div>
+    </div>
+
+    <!-- Topics Section -->
+    <div class="section">
+        <h2>🏷️ Key Topics</h2>
+        <div class="topics-box">
+            <pre>{{ podcast.topics }}</pre>
+        </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="section">
+        <h2>📖 Summary</h2>
+        <div class="summary-box">
+            <p>{{ podcast.summary }}</p>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="button-group" style="margin-top: 3rem;">
+        <a href="/review/" class="btn">
+            <span>✅</span> Review Content
+        </a>
+        <a href="/" class="btn secondary">
+            <span>⬆️</span> Upload Another
+        </a>
+    </div>
+
+    <!-- Additional Info -->
+    <div class="alert alert-success" style="margin-top: 2rem;">
+        <div class="alert-icon">✓</div>
+        <div>
+            <strong>Analysis complete!</strong>
+            <p style="margin: 0.5rem 0 0 0;">Review the transcription, topics, and summary. Send to review queue when ready.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

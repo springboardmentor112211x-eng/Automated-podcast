@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review Content - Podcast AI{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">✅</span>
+        <div>
+            <h1>Review Queue</h1>
+            <p class="subtitle">Manage and approve pending podcasts for publishing</p>
+        </div>
+    </div>
+
+    {% if podcasts %}
+        <div class="alert alert-info">
+            <div class="alert-icon">ℹ️</div>
+            <div>
+                <p style="margin: 0;">{{ podcasts|length }} podcast{{ podcasts|length|pluralize }} awaiting review</p>
+            </div>
+        </div>
+
+        <div class="grid">
+            {% for p in podcasts %}
+            <div class="podcast-card">
+                <div class="podcast-info">
+                    <h3>Podcast #{{ p.id }}</h3>
+                    <p>
+                        <span class="podcast-status">{{ p.status|default:"Pending Review" }}</span>
+                    </p>
+                    <p style="font-size: 13px; color: var(--text-tertiary);">
+                        ID: <strong>#{{ p.id }}</strong>
+                    </p>
+                </div>
+                <form method="post" style="display: flex; gap: 0.5rem;">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" value="{{ p.id }}">
+                    <button type="submit" class="btn success" style="margin: 0;">
+                        <span>✓</span> Approve
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p style="font-size: 18px; margin-bottom: 1rem;">No podcasts to review</p>
+            <p style="color: var(--text-tertiary); margin-bottom: 2rem;">All pending items have been processed!</p>
+            <a href="/" class="btn">
+                <span>⬆️</span> Upload New Podcast
+            </a>
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 3rem;">
+        <a href="/" class="btn secondary">
+            <span>←</span> Back to Upload
+        </a>
+    </div>
+</div>
+{% endblock %}
