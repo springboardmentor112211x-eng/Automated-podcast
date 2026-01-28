@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Podcast Analyzer</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Change this if your backend is on a different host/port
+    window.API_BASE = 'http://127.0.0.1:8000';
+  </script>
+</head>
+<body>
+  <header class="container">
+    <h1>Podcast Analyzer</h1>
+    <p>Upload your podcast audio, we will process it and produce a full transcript and topic-wise summary.</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>1. Upload Audio</h2>
+      <input id="fileInput" type="file" accept="audio/*" />
+      <button id="uploadBtn">Upload & Start Processing</button>
+      <p class="hint">Max 200 MB per file (current backend limit). For longer podcasts, use compressed formats (e.g. MP3). You can raise this via the AUDIO_MAX_FILE_MB environment variable.</p>
+      <div id="status" class="status"></div>
+    </section>
+
+    <section class="card">
+      <h2>2. Transcription</h2>
+      <div id="transcription" class="result">
+        <p class="muted">No transcription yet. Upload an audio file to begin.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3. Summary</h2>
+      <div id="summary" class="result">
+        <p class="muted">No summary yet. Upload an audio file to begin.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <small>Created by Anu</small>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
