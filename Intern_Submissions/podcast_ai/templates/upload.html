@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload Podcast - Podcast AI{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">⬆️</span>
+        <div>
+            <h1>Upload Podcast</h1>
+            <p class="subtitle">Upload your podcast audio file for automatic transcription and analysis.</p>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" data-auto-submit="false">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label>Select Audio File</label>
+            <div class="upload-area">
+                <div class="upload-icon">📤</div>
+                <p class="main">Drag & drop your podcast here</p>
+                <p class="sub">or click to browse (MP3, WAV, M4A, FLAC)</p>
+            </div>
+            <input type="file" id="audioInput" name="audio" accept="audio/*" required>
+            <p style="font-size: 13px; color: var(--text-tertiary); margin-top: 1rem;">
+                Max file size: 500 MB • Supported: MP3, WAV, M4A, FLAC, OGG
+            </p>
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn">
+                <span>🚀</span> Upload & Process
+            </button>
+        </div>
+    </form>
+
+    <div class="alert alert-info" style="margin-top: 2rem;">
+        <div class="alert-icon">ℹ️</div>
+        <div>
+            <strong>How it works:</strong>
+            <p style="margin: 0.5rem 0 0 0;">Upload an audio file and our AI will transcribe, extract key topics, and generate a summary automatically.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/drag-drop.js' %}"></script>
+{% endblock %}
+
